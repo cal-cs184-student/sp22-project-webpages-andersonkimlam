@@ -26,16 +26,15 @@
 
         </p>
         <p>
-            There are 5 parts total, where we iteratively build onto each onto to build more complex renderings that
-            have more advanced lighting techniques. We implemented core features of how path racing rendering
-            programs work and it is a physically based rendering technique that simulates light behavior for photo realistic images.
-            This works by casting rayss through each pixel and then averaging values to calculate hte final color. The values of the rays
-            are also from direct/indirect lighting so it looks lit or like a shadow.
+            There are 5 parts total, where we iteratively build onto each to build more complex renderings that
+            have more advanced lighting techniques. We implemented core features of pathtracing, and learned how it is a physically based rendering technique that simulates light behavior for photo realistic images.
+            This works by casting rays through each pixel and then averaging values to calculate the final color. The values of the rays
+            are also from direct/indirect lighting so it looks lit or like a shadow. At a high level, we firsst generated camera light rays, and implemented triangle and sphere primitive intersections. We optimized the structure by using a BVH / bounding volume hierarchy to speed up our render times significantly. Then we implemented shadows and used direct & indirect illumination methods to create more realistic imaging.
             <br />
             <br />
-            This project has been rewarding too just because of how cool it is to see our renders work
-            and come to life. We deployed simple but powerful techniques and got insight on how modern
-            graphics may work. It was also satisfying to reduce computation times.
+            This project has been so rewarding and interesting, and it was crazy to see our renders work
+            and come to life. We saw our scenes go from simple meshes, to harsh shadows, to more realistic lighting. We deployed simple but powerful techniques and got insight on how modern
+            graphics may work. We also explored optimization methods to speed up our runtime.
             <br /><br />
             Our approach to this project was to really just focus on grabbing what we could from lecture and piazza, and luckily
             the rubric was well defined on what we needed to achieve. However, due to small misunderstandings on the logic
@@ -163,7 +162,7 @@
             Our BVH construction algorithm is as follows: in our base case we have less than <code>max_leaf_size</code> primitives (current node is the leaf node) we iterate through every primative from start to end, and include them in our bounding box. We return the leaf node to end the recursion. If the node is not a leaf, we want to recurse on the left and right subnodes, by splitting our vector of primitives into 2.<br />
         </p>
         <p align="middle"><img src="images/part2-diagram.png" width="400px" /></p>
-        <br />Our heuristic: In order to find the condition to break up the vector into roughly equal-sized paritions, we find the centroid point of the biggest dimention bounding box, and split accordingly with the <code>x,y,z</code> coordinates. However, this leaves us with the edge case of a left or right vector having no primitives and will result in an infinite recursion. To account for this, we resplit the vector when this happens to ensure that both child nodes will have primitives.<br />
+        <br />Our heuristic: In order to find the condition to break up the vector into roughly equal-sized paritions, we find the centroid point of the biggest dimention bounding box, and split accordingly with the <code>x,y,z</code> coordinates. We did this by finding the largest bounding box's axis after we gathered that information by iterating through all the primitives. However, this leaves us with the edge case of a left or right vector having no primitives and will result in an infinite recursion. To account for this, we resplit the vector when this happens to ensure that both child nodes will have primitives.<br />
         <br />We also implemented <code>intersect</code> of the bounding boxes and BVH nodes in this portion. We calculated the intersections using the equation: </p>
 
         <code> t = ( p' - o ) / d </code>
@@ -212,7 +211,7 @@
             at least 80x as seen by the cow rendering times on one of our computers. A BVH with a simple heuristic could make
             a really big difference for rendering times.
         </p>
-        <p>Cow.dae render times before</p>
+        <p>Cow.dae render times before our implementation</p>
         <p align="middle">
             <pre align="left">
 [PathTracer] Rendering... 100%! (40.5877s)
@@ -222,7 +221,7 @@
             </pre>
         </p>
 
-        <p>Cow.dae render times before after</p>
+        <p>Cow.dae render times after our implementation</p>
         <p align="middle">
             <pre align="left">
 [PathTracer] Rendering... 100%! (0.5392s)
@@ -270,7 +269,7 @@
         </p>
         <p>
             After implementing this, we were then able to render the scenes shown above extremely quick,
-            even on our own machines. We were only able to render the cow.dae and teapot.dae previosuly so there are no other renders for before BVH. For the teapot, the speed increase
+            even on our own machines, despite these scenes having thousands of tiny triangles that needed to be rendered. We were only able to render the cow.dae and teapot.dae previosuly so there are no other renders for before BVH. For the teapot, the speed increase
             was similar to cow.dae and the renders look the same. We ended up running into several debugging sessions related to our BVH structure and BBox intersection algorithm. One issue we had was pointer/memory deallocation, where creating a new <code>std::vector</code> failed in recursive calls. However we resolved this by trying various suggestions on piazza, andd ended up using <code> std::partition </code> to split up the primitives and get the new start and end iterators.
         </p>
 
@@ -290,7 +289,6 @@
             The direct lighting function takes a ray and intersection and we exxtrapolate hit_p for this and w_out.
             <br />
             <br />
-
 
             In the direct hemisphere lighting, our function takes uniform samples surrounding the provided
             hit_p and computed the radiance. This part was straightforward to get the samples. We update our functions
