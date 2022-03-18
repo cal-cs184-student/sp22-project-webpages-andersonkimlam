@@ -263,14 +263,16 @@
                         </td>
 
 
-  
+
                     </tr>
                 </table>
             </div>
         </p>
-        <p> After implementing this, we were then able to render the scenes shown above extremely quick,
-        even on our own machines. We were only able to render the cow.dae and teapot.dae previosuly so there are no other renders for before BVH. For the teapot, the speed increase
-        was similar to cow.dae and the renders look the same. We ended up running into several debugging sessions related to our BVH structure and BBox intersection algorithm. One issue we had was pointer/memory deallocation, where creating a new <code>std::vector</code> failed in recursive calls. However we resolved this by trying various suggestions on piazza, andd ended up using <code> std::partition </code> to split up the primitives and get the new start and end iterators.</p>
+        <p>
+            After implementing this, we were then able to render the scenes shown above extremely quick,
+            even on our own machines. We were only able to render the cow.dae and teapot.dae previosuly so there are no other renders for before BVH. For the teapot, the speed increase
+            was similar to cow.dae and the renders look the same. We ended up running into several debugging sessions related to our BVH structure and BBox intersection algorithm. One issue we had was pointer/memory deallocation, where creating a new <code>std::vector</code> failed in recursive calls. However we resolved this by trying various suggestions on piazza, andd ended up using <code> std::partition </code> to split up the primitives and get the new start and end iterators.
+        </p>
 
 
         <h2 align="middle">Part 3: Direct Illumination</h2>
@@ -289,6 +291,7 @@
             <br />
             <br />
 
+
             In the direct hemisphere lighting, our function takes uniform samples surrounding the provided
             hit_p and computed the radiance. This part was straightforward to get the samples. We update our functions
             to add one_bounce_radiance()'s value to get an estimate of the direct light. one_bounce_radiance() performs
@@ -296,6 +299,7 @@
             struct and shadow ray and test if the shadow ray interesects anything, and adding its value if it does multiplied
             by the angle and reflectance. We then need to normalize by the pdf and num_samples after adding everything up.
         </p>
+        <p align="middle"><img src="images/part3-diagram1.png" width="400px" /></p>
         <p align="middle"><img src="images/part3-formula.png" width="400px" /></p>
         <div align="center">
             <table style="width=100%">
@@ -416,7 +420,7 @@
             of the total radiance from a given direction. First, it calls zero_bounce_radiance(), then
             it calls at_least_one_bounce_radiance() in order to accumulate light.
         </p>
-
+        <p align="middle"><img src="images/part3-diagram.png" width="400px" /></p>
         <p>
             For the at_least_one_bounce function, we basically initalized the light from one_bounce_radiance, then took a sample
             from the BSDF surface (defines our w_in from our w_out), perform one bounce, and then use the russian roulette random sampling with
