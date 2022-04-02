@@ -1,7 +1,444 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title>Amy Huang & Anderson Lam  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+    <br />
+    <h1 align="middle">Assignment 3-2: PathTracer</h1>
+    <h2 align="middle">Amy Huang | Anderson Lam</h2>
+    <p align="middle"><a href="https://cal-cs184-student.github.io/sp22-project-webpages-andersonkimlam/proj3-2/index.html">Write-up Link (https://cal-cs184-student.github.io/sp22-project-webpages-andersonkimlam/proj3-2/index.html)</a></p>
+    <div class="padded">
+        <p>
+            This project built onto our previous path tracer project,
+            but this time we focused more on specific compenents that would make our
+            renders more life like. We had the option of doing glass/mirror materials,
+            microfacet material, environment light, or depth of field.
+
+            We chose to do depth of field and mirror and glass materials. Both parts are standalone,
+            so we didn't need to rely on the parts to proceed. Thus, we separated the two parts between
+            the two of us.
+        </p>
+
+        <p>
+            This project was also very rewarding like the previous, but it was nice to take things slower
+            and then focus on how to make it better with simple tricks. For glass and mirror materials,
+            we made it so different objects that had the material would properly reflect and show light. For depth of field,
+            we made it so we can blur the background to get a focusing effect. We also needed a coin flip to determine refelct or refract.
+
+            Our approach to this project was to focus on reading from piazza and pay attention to the spec closely. The spec
+            didn't have too many references for rendered images, so we needed to do more testing
+            to confirm ours were correctly done.
+        </p>
+
+        <h2 align="middle">Mirror and Glass Materials (Part 1)</h2>
+        <p>We implemented mirror and glass models using reflection and refraction in this part. First we calculated the reflection vector and wrote <code>MirrorBSDF::sample_f()</code> which stored the <code>wi</code> value mirroring the <code>wo</code> ray. Then we implemented refraction in order to render glass-like materials, using concepts like Snell's law and Schlick's reflection approximation. </p>
+
+        <center> <img align="center" src="images/part1-info.png" width="580px" /> </center>
+
+        <p>For mirror material we used concepts from lecture and particularly the equation from "Perfect Specular Reflection" <code> w_o = -w_i + 2 ( w_i * n ) n</code> <br /> Here is our CBDragon rendered with mirror material.</p>
+        <center> <img align="center" src="images/p1-dragon .png" width="580px" /> </center>
+
+        <p>For refraction we utilized the index of refraction, and the Snell's equations to calculate the new ray.<br /> <code> cos theta ' = sqrt( 1 - n^2 ( 1 - cos^2 theta ) ) </code><br /> Using this calculation this we were able to render glass material. First we checked if there was total internal refraction where <code>  1 - n^2 ( 1 - cos^2 theta )  < 0 </code>, and would reflect in that case. Else, we computed Schlick's reflection constant (R) to determine probabilistically if we should reflect or refract, using a pdf of either R  or 1-R. Below is our implementation of a glass Lucy scene.</p>
+        <center> <img align="center" src="images/p1-lucy.png" width="580px" /> </center>
+
+        <p> We ran into some debugging issues where we didn't properly look through the helper methods and provided variables like reflectance. First I accidentally kept returnng a constant value instead of reflectance, and I forgot to use the provided coin_flip method as well. We were able to quickly spot our errors by reading through Piazza posts and rereading the spec. </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/s64l4m0.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 0</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/s64l4m1.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 1</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/s64l4m2.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 2</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/s64l4m3.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 3</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/s64l4m4.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 4</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/s64l4m5.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 5</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/s64l4m10.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 10</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/s64l4m64.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 64</figcaption>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/s64l4m100.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 100</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/s64l4m200.png" width="480px" />
+                        <figcaption align="middle">CBspheres s = 64, l = 4, m = 200</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>
+            When m = 0, we have 0 bounce, so only the light source is lit. This is expected and the whole room in the
+            scene is all dark.
+
+            <br /> <br />When m = 1, the spheres have one bounce/reflection
+            from the light source, so there is a reflection, but the spheres stay mostly black and the scene is lit. The spheres are dark
+            because both reflection and refraction involve more than just a single bounce. When m = 1, the ceiling is also dark in the mirror and glass.
+            As we increase the max ray depth, more light
+            bounces occur, as thus we see how the spheres truly act. After a certain point though, there is no significant difference between
+            the images.
+        </p>
+
+
+
+        <p>
+            When m = 2, we see that the mirror is present by seeing a reflection, but the glass
+            is still dark as we need more bounce of light to go through the material.
+            The glass is also dark in the mirror. There is some reflecting/refracting. The ceiling is dark in the reflection.
+            <br /> <br /> At m = 3,
+            we see how the glass acts much better, but the mirror shows the reflection of glass as dark, which
+            isn't realistic and true as our glass is lit. Essentially, because our bounces are low,
+            the bounce in the reflection is still lagging behind by 1 step. We also continue to see some refracting from the mirror so the ground/shadow is lit.
+            This effect is more prominent now and it is the exact bounces we expect it to appear. The ceiling is also no longer dark in the reflection.
+            <br /> <br />At m = 4, the mirror is lit and shows our glass ball
+            correctly, but it is still not showing as much light as it should.  The bottom of the ball is also now brighter
+            next to the ground refraction. This is a result of more reflecting bounces between the sphere and ground. We see what the glass ball looked like at m = 3 in the mirror reflection. The glass ball also
+            refracts light on the wall and the ground, which we see more of when m = 5. However, the refraction of light
+            is only on the ground for m = 4.
+
+            <br /> <br /> At m = 5, everything is already pretty lit and the lights have converged and as mentioned,
+            we have light refracted onto the wall as well.
+
+            <br /> <br /> At m = 100, there is no real difference compared to m = 5.
+
+            <br /> <br />
+
+            When
+            we increase the ray depth even more, it is a much brighter image. For example when m = 100, we don't
+            see new multi bounce effects (converging).
+        </p>
+
+        <p> To recap, we started our experiment from no bounces to many bounce sof light. As the
+        bounce number increase, we see more realistically what happens in real life. When there is 0 bounce,
+        only the light source is present. When there is 1 bounce, we don't see light bounced from the
+        materials (glass/mirror). As we increase the bounces, we have more light reflecting off the mirror,
+        walls, and glass to light everythung up.</p>
+
+        <p>The images also become noiser as m increases as light bounces more apparently on the walls (white specs on walls). The refraction
+        on the ground and side also get noiser as there is a wider variety of refractions/reflections so there
+            is more complicated effects. If we were the render at more samples per pixel, we would see much less noise.</p>
+
+        <p> If we take a look at the sampling rate images, we can see that the spheres are green/blue when max ray depth is low, but becomes red as we need
+        to sample more as we have more light rays. The rate images also show where some places in the scene aren't really getting light, which
+        our results confirm.</p>
+
+
+
+
+
+
+        <h2 align="middle">Depth of Field (Part 4)</h2>
+        <p>
+            In this section, we implement the thin-lens model so we can utilize
+            focusing compared to the ideal pin-hole camera that we had used where everything is
+            in focus. Essentially, we simulate a depth of field for our rendered objects. In the pinhole model, we trace a ray from the pinhole until it lands
+            on some geometry and gather information about the radiance and then display it. Thus, everything just stays in focus no matter how far it is from the camera.
+        </p>
+
+        <p>
+            In our new thin-lens model, we can specify a focal distance
+            and lens radius (aperature) in order to focus on certain parts
+            of the scene. This is like real life as cameras have some finite aperature and
+            we have an idea of focal dsitance. We instead trace a ray straight through the pinhole,
+            but also have achange in direction of that ray as it passes through some lens.
+            Human eyes and cameras work more like this way.
+        </p>
+
+        <img src="images/part4diag.png" width="300px" />
+
+        <p>
+            As seen in the image above, we need to generate the blue ray. Overall, we need
+            to first generate the red ray using the same process as in part 1 of pathracer, so I copied
+            my old code over to covert the camera world coordinates. We then
+            uniformly sample the disk of the thin lens and calculate the focus point. From there, we can generate
+            a ray from the disk to the focus point and convert the ray properly to get the blue ray.
+        </p>
+        <p>
+            For this part, we also don't need to worry about the thickness of the thin lens
+            as we assume it is ideal and can still simulate our desired effects.
+        </p>
+
+        <p> <strong>Focus Stack</strong></p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/b003d000.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 0.00 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/b003d020.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 0.20 </figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/b003d050.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 0.50 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/b003d070.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 0.70 </figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/b003d090.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 0.90 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/b003d120.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 1.20</figcaption>
+                    </td>
+                </tr>
+                <tr>
+
+                    <td align="middle">
+                        <img src="images/b003d250.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 2.50</figcaption>
+                    </td>
+
+                    <td align="middle">
+                        <img src="images/b003d500.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 5.00</figcaption>
+                    </td>
+                </tr>
+                <tr>
+
+
+                    <td align="middle">
+                        <img src="images/b003d700.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 7.00</figcaption>
+                    </td>
+
+                    <td align="middle">
+                        <img src="images/nb123d420.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 1.23, d = 4.20</figcaption>
+                    </td>
+                </tr>
+                <tr>
+
+                    <td align="middle">
+                        <img src="images/nb123d440.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 1.23, d = 4.40</figcaption>
+                    </td>
+
+                    <td align="middle">
+                        <img src="images/nb123d460.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 1.23, d = 4.60</figcaption>
+                    </td>
+                </tr>
+                <tr>
+
+
+
+                    <td align="middle">
+                        <img src="images/nb123d480.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 1.23, d = 4.80</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/nb123d500.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 1.23, d = 5.00</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <p>
+            In the section above, we modify the focal distances to compare
+            how the scene view changes, but keep all else the same. We can see that as the focal distance increase,
+            the focus on the dragon shifts around. This is because we focus on different
+            parts as the distance changes (farther vs closer). Again, the images
+            look the way they do as there is now some depth of field and thin lens involved,
+            so there is blur. We can determine where the focal point is with the argument we provide.
+        </p>
+
+        <p><strong> Different aperatures (lens radius)</strong></p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/b000d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.00, d = 4.56 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/b001d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.01, d = 4.56 </figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/b002d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.02, d = 4.56 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/b003d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.03, d = 4.56</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/b005d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.05, d = 4.56</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/b010d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.10, d = 4.56</figcaption>
+                    </td>
+                </tr>
+                <tr>
+
+                    <td align="middle">
+                        <img src="images/b015d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.15, d = 4.56</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/b020d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.20, d = 4.56</figcaption>
+                    </td>
+                </tr>
+                <tr>
+
+
+
+                    <td align="middle">
+                        <img src="images/nb005d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.05, d = 4.56</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/nb010d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.10, d = 4.56</figcaption>
+                    </td>
+                </tr>
+                <tr>
+
+
+
+                    <td align="middle">
+                        <img src="images/nb025d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.25, d = 4.56</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/nb100d456.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 1.00, d = 4.56</figcaption>
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+
+        <p>
+            For this section, we keep all constant except the aperature/lens radius. This causes the
+            amount of blur to change, where larger lens allow for a larger area of blur and the focused area
+            is smaller. Our focal depth is kept the same, so we increase and decrease the aperature to change
+            how much of a blur we want.
+        </p>
+
+
+        <p><strong>More photos from this section!</strong></p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/nb005d420.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.05, d = 4.20 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/nb010d420.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.10, d = 4.20 </figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/nb025d420.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.25, d = 4.20 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/nb100d420.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 1.00, d = 4.20 </figcaption>
+                    </td>
+                </tr>
+                <tr>
+
+                    <td align="middle">
+                        <img src="images/nb010d440.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.10, d = 4.40</figcaption>
+                    </td>
+
+                    <td align="middle">
+                        <img src="images/nb010d460.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.10, d = 4.60</figcaption>
+                    </td>
+                </tr>
+                <tr>
+
+                    <td align="middle">
+                        <img src="images/nb010d480.png" width="480px" />
+                        <figcaption align="middle">CBdragon s = 64, l = 4, m = 12, b = 0.10, d = 4.80</figcaption>
+                    </td>
+                </tr>
+
+
+            </table>
+        </div>
+        <p>
+            This section was fun to do, but it was a little tricky for us to debug how the rays work.
+            We didn't realize we could simply reuse a lot of code from our previous project, which made it much easier.
+            Then, we had to debug how the position of the ray is calculated and generated (geometry). We didn't need to spend that much time
+            on the code, but figuring out how to make the images cooler or at least see that
+            our aperature/focal distance change had our desired effects was time consuming.
+        </p>
+        <h2 align="middle">Collaboration</h2>
+        <p>
+            We have worked together for various technical projects in the past and we both learned so much from this project especially! We were able to collaborate effectively by peer programming and debugging together, as well as collaborating on the writeup and using our computers to render.
+            We also posted on Piazza when running into errors we both struggled with. We worked synchronously and separated
+            out which parts we should do. We made sure to spend the time to teach each other how each part is implemented and works.
+        </p>
+    </div>
+</body>
 </html>
+
+
+
+
